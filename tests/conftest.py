@@ -11,16 +11,30 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 @pytest.fixture(scope="session", autouse=True)
 def test_servers():
-    """Start test P4D servers before tests, stop after."""
+    """Start test P4D servers before tests, stop after.
+
+    Servers are best-effort: if setup fails (e.g. p4d not installed),
+    tests that don't need live servers can still run.  Tests requiring
+    servers should explicitly depend on this fixture and skip when it
+    returns None.
+    """
     script = os.path.join(os.path.dirname(__file__), "..", "scripts", "setup_test_servers.sh")
-    subprocess.run(["bash", script], check=True, capture_output=True, text=True)
-    time.sleep(1)  # Give servers a moment to stabilize
+    try:
+        subprocess.run(["bash", script], check=True, capture_output=True, text=True)
+        time.sleep(1)  # Give servers a moment to stabilize
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        yield None
+        return
+
     yield {
         "tokyo-main": {"port": "localhost:1701", "user": "super", "name": "tokyo-main"},
         "osaka-dev": {"port": "localhost:1702", "user": "super", "name": "osaka-dev"},
         "nagoya-art": {"port": "localhost:1703", "user": "super", "name": "nagoya-art"},
     }
-    subprocess.run(["bash", script, "--teardown"], check=True, capture_output=True, text=True)
+    try:
+        subprocess.run(["bash", script, "--teardown"], check=True, capture_output=True, text=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
 
 
 @pytest.fixture
