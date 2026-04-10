@@ -73,7 +73,13 @@ class P4Connector:
             if license_info:
                 for entry in license_info:
                     if isinstance(entry, dict) and "userCount" in entry:
-                        licensed = int(entry["userCount"])
+                        raw = entry["userCount"]
+                        # Handle values like ">5" or "unlimited"
+                        cleaned = raw.lstrip(">").strip()
+                        try:
+                            licensed = int(cleaned)
+                        except ValueError:
+                            licensed = None
             users = self._p4.run("users")
             used = len([u for u in users if u.get("Type", "standard") == "standard"])
             return {"licensedSlots": licensed, "usedSlots": used}
