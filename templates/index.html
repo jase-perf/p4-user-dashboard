@@ -4,10 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>P4 User Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
-    <h1>P4 User Dashboard</h1>
-    <p>Loading...</p>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+
+    <!-- Top Bar -->
+    <header id="top-bar" class="bg-gray-800 border-b border-gray-700 px-6 py-3 flex items-center justify-between flex-wrap gap-y-2">
+        <div class="flex items-center gap-6 flex-wrap">
+            <h1 class="text-lg font-semibold text-blue-400">P4 User Dashboard</h1>
+            <span id="stat-servers" class="stat-pill">Servers: <strong>-</strong></span>
+            <span id="stat-users" class="stat-pill">Unique Users: <strong>-</strong></span>
+            <span id="stat-accounts" class="stat-pill">Accounts: <strong>-</strong></span>
+            <span id="stat-licensed" class="stat-pill hidden">Licensed: <strong>-</strong></span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="btn-refresh" class="btn-primary" onclick="app.refreshAll()">Refresh</button>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-gray-800 border-b border-gray-700 px-6">
+        <div class="flex gap-1">
+            <button class="tab-btn active" data-view="users" onclick="app.switchView('users')">Users</button>
+            <button class="tab-btn" data-view="servers" onclick="app.switchView('servers')">Servers</button>
+            <button class="tab-btn" data-view="config" onclick="app.switchView('config')">Config</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+        <!-- Loading State -->
+        <div id="loading" class="text-center py-20 text-gray-400">
+            <div class="inline-block w-8 h-8 border-4 border-gray-600 border-t-blue-400 rounded-full animate-spin mb-4"></div>
+            <p>Loading data from servers...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-banner" class="hidden bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-4"></div>
+
+        <!-- Users View -->
+        <div id="view-users" class="view hidden">
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-3 mb-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="filter-label">Search</label>
+                    <input id="filter-search" type="text" placeholder="Email, name, or username..."
+                        class="filter-input" oninput="app.applyFilters()">
+                </div>
+                <div>
+                    <label class="filter-label">Inactive</label>
+                    <select id="filter-inactive" class="filter-input" onchange="app.applyFilters()">
+                        <option value="0">All</option>
+                        <option value="30">30+ days</option>
+                        <option value="60">60+ days</option>
+                        <option value="90">90+ days</option>
+                        <option value="180">180+ days</option>
+                        <option value="365">365+ days</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="filter-label">Inactive Field</label>
+                    <select id="filter-inactive-field" class="filter-input" onchange="app.applyFilters()">
+                        <option value="latestAccess">Latest Access</option>
+                        <option value="oldestLatestAccess">Oldest Latest Access</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="filter-label">Server</label>
+                    <select id="filter-server" class="filter-input" onchange="app.applyFilters()">
+                        <option value="">All Servers</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="filter-label">Type</label>
+                    <select id="filter-type" class="filter-input" onchange="app.applyFilters()">
+                        <option value="">All</option>
+                        <option value="standard">Standard</option>
+                        <option value="service">Service</option>
+                        <option value="operator">Operator</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="user-count" class="text-sm text-gray-400 mb-2"></div>
+
+            <div class="table-wrap">
+                <table id="users-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="email">Email</th>
+                            <th class="sortable" data-sort="displayName">Display Name</th>
+                            <th class="sortable" data-sort="accountCount">Accounts</th>
+                            <th class="sortable" data-sort="serverCount">Servers</th>
+                            <th class="sortable" data-sort="latestAccess">Latest Access</th>
+                            <th class="sortable" data-sort="oldestLatestAccess">Oldest Latest Access</th>
+                            <th class="sortable" data-sort="types">Type(s)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Servers View -->
+        <div id="view-servers" class="view hidden">
+            <div class="table-wrap">
+                <table id="servers-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="name">Name</th>
+                            <th class="sortable" data-sort="port">Connection</th>
+                            <th class="sortable" data-sort="licensedSlots">Licensed</th>
+                            <th class="sortable" data-sort="usedSlots">Used</th>
+                            <th class="sortable" data-sort="utilization">Utilization</th>
+                            <th class="sortable" data-sort="totalAccounts">Accounts</th>
+                            <th class="sortable" data-sort="status">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="servers-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Config View -->
+        <div id="view-config" class="view hidden">
+            <div class="max-w-4xl">
+                <h2 class="text-xl font-semibold mb-4">Dashboard Configuration</h2>
+
+                <div class="mb-6">
+                    <label class="filter-label">Licensed Unique Users</label>
+                    <input id="config-licensed" type="number" min="0" placeholder="e.g. 1500"
+                        class="filter-input w-48">
+                    <p class="text-xs text-gray-500 mt-1">Total licensed seats across all servers (for the top-bar indicator).</p>
+                </div>
+
+                <h3 class="text-lg font-semibold mb-3">Servers</h3>
+                <div class="table-wrap mb-4">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Port (host:port)</th>
+                                <th>User</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="config-servers-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="flex gap-3">
+                    <button class="btn-secondary" onclick="app.configAddServer()">+ Add Server</button>
+                    <button class="btn-primary" onclick="app.configSave()">Save Config</button>
+                </div>
+                <div id="config-status" class="mt-3 text-sm hidden"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div id="modal-overlay" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <h3 id="modal-title" class="text-lg font-semibold mb-3"></h3>
+            <p id="modal-body" class="text-gray-300 mb-6"></p>
+            <div class="flex justify-end gap-3">
+                <button class="btn-secondary" onclick="app.modalClose()">Cancel</button>
+                <button id="modal-confirm" class="btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/app.js"></script>
 </body>
 </html>
