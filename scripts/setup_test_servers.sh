@@ -9,6 +9,11 @@ teardown() {
     for port in "${PORTS[@]}"; do
         p4 -p "localhost:$port" admin stop 2>/dev/null || true
     done
+    # Kill any remaining p4d processes on test ports (handles zombie servers)
+    for port in "${PORTS[@]}"; do
+        pkill -9 -f "p4d -p $port" 2>/dev/null || true
+    done
+    sleep 0.5
     rm -rf "$BASE_DIR"-*
     echo "Test servers stopped and cleaned up."
 }
@@ -27,7 +32,7 @@ for i in "${!PORTS[@]}"; do
     root="$BASE_DIR-$((i+1))"
 
     mkdir -p "$root"
-    p4d -p "$port" -r "$root" -d
+    p4d -p "$port" -r "$root" -d </dev/null >/dev/null 2>&1
     echo "Started $name on port $port (root: $root)"
 
     export P4PORT="localhost:$port"
