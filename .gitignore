@@ -2,3 +2,12 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
+
+# Demo server runtime data (recreated from checkpoints)
+demo/data/
+
+# Downloaded p4d binary (not committed — downloaded on setup)
+demo/bin/
+
+# User config files
+configs/

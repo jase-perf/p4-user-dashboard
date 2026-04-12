@@ -11,17 +11,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 @pytest.fixture(scope="session", autouse=True)
 def test_servers():
-    """Start test P4D servers before tests, stop after.
-
-    Servers are best-effort: if setup fails (e.g. p4d not installed),
-    tests that don't need live servers can still run.  Tests requiring
-    servers should explicitly depend on this fixture and skip when it
-    returns None.
-    """
-    script = os.path.join(os.path.dirname(__file__), "..", "scripts", "setup_test_servers.sh")
+    """Start demo P4D servers before tests, stop after."""
+    setup_script = os.path.join(os.path.dirname(__file__), "..", "demo", "setup.sh")
     try:
-        subprocess.run(["bash", script], check=True, capture_output=True, text=True)
-        time.sleep(1)  # Give servers a moment to stabilize
+        subprocess.run(["bash", setup_script], check=True, capture_output=True, text=True)
+        time.sleep(1)
     except (subprocess.CalledProcessError, FileNotFoundError):
         yield None
         return
@@ -34,7 +28,7 @@ def test_servers():
         "singapore-qa": {"port": "localhost:1705", "user": "super", "name": "singapore-qa"},
     }
     try:
-        subprocess.run(["bash", script, "--teardown"], check=True, capture_output=True, text=True)
+        subprocess.run(["bash", setup_script, "--teardown"], check=True, capture_output=True, text=True)
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
 
@@ -46,7 +40,7 @@ def test_config(test_servers, tmp_path):
 
     config = {
         "port": 8080,
-        "licensedUniqueUsers": 10,
+        "licensedUniqueUsers": 50,
         "servers": [
             {"name": name, "port": info["port"], "user": info["user"]}
             for name, info in test_servers.items()
