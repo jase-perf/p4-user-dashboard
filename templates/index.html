@@ -19,6 +19,10 @@
             <span id="stat-licensed" class="stat-pill hidden">Licensed: <strong>-</strong></span>
         </div>
         <div class="flex items-center gap-3">
+            <select id="lang-select" class="filter-input" onchange="app.setLanguage(this.value)" style="width: auto;">
+                <option value="en">English</option>
+                <option value="ja">日本語</option>
+            </select>
             <button id="btn-refresh" class="btn-primary" onclick="app.refreshAll()">Refresh</button>
         </div>
     </header>

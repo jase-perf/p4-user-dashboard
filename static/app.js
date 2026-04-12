@@ -28,6 +28,226 @@ function escAttr(s) {
 }
 
 // ---------------------------------------------------------------------------
+// Internationalization
+// ---------------------------------------------------------------------------
+
+var LANG = {
+    en: {
+        // Top bar
+        title: "P4 User Dashboard",
+        servers: "Servers",
+        uniqueUsers: "Unique Users",
+        accounts: "Accounts",
+        licensed: "Licensed",
+        refresh: "Refresh",
+        refreshing: "Refreshing...",
+
+        // Tabs
+        tabUsers: "Users",
+        tabServers: "Servers",
+        tabConfig: "Config",
+
+        // Users table headers
+        email: "Email",
+        displayName: "Display Name",
+        accountCount: "Accounts",
+        serverCount: "Servers",
+        latestAccess: "Latest Access",
+        oldestLatestAccess: "Oldest Latest Access",
+        types: "Type(s)",
+
+        // Filter placeholders
+        searchPlaceholder: "Search...",
+        allServers: "All Servers",
+        any: "Any",
+        all: "All",
+        newerThan: "Newer than",
+        olderThan: "Older than",
+
+        // Filter options
+        lt7days: "< 7 days",
+        lt30days: "< 30 days",
+        lt90days: "< 90 days",
+        gt30days: "> 30 days",
+        gt60days: "> 60 days",
+        gt90days: "> 90 days",
+        gt180days: "> 180 days",
+        gt365days: "> 365 days",
+
+        // Type options
+        standard: "Standard",
+        service: "Service",
+        operator: "Operator",
+
+        // Users detail
+        username: "Username",
+        fullName: "Full Name",
+        server: "Server",
+        lastAccess: "Last Access",
+        updated: "Updated",
+        type: "Type",
+        actions: "Actions",
+        edit: "Edit",
+        delete: "Delete",
+
+        // Showing count
+        showingOf: function(shown, total) { return "Showing " + shown + " of " + total + " users"; },
+
+        // Servers table
+        name: "Name",
+        connection: "Connection",
+        licensedSlots: "Licensed",
+        usedSlots: "Used",
+        utilization: "Utilization",
+        status: "Status",
+
+        // Config
+        dashboardConfig: "Dashboard Configuration",
+        licensedUniqueUsers: "Licensed Unique Users",
+        licensedDesc: "Total licensed seats across all servers (for the top-bar indicator).",
+        serversHeading: "Servers",
+        portLabel: "Port (host:port)",
+        user: "User",
+        addServer: "+ Add Server",
+        saveConfig: "Save Config",
+        configSaved: "Configuration saved.",
+        test: "Test",
+        remove: "Remove",
+        testing: "Testing...",
+
+        // Edit modal
+        editUser: "Edit User",
+        onServer: "on",
+        loadingDetails: "Loading user details...",
+        passwordReset: "Password Reset",
+        generateReset: "Generate & Reset Password",
+        resetAgain: "Reset Again",
+        passwordDesc: "Assigns a random password and forces the user to change it on next login.",
+        tempPassword: "New temporary password (copy and share with user):",
+        ssoNotice: function(method) { return "This account uses SSO authentication (" + method + "). Password reset is not available."; },
+        saveChanges: "Save Changes",
+        cancel: "Cancel",
+
+        // Delete modal
+        deleteUser: "Delete User",
+        deleteConfirm: function(user, server) { return 'Are you sure you want to delete user "' + user + '" from server "' + server + '"? This cannot be undone.'; },
+
+        // Test connection statuses
+        connected: "Connected",
+        trustFailed: "Trust Failed",
+        authFailed: "Auth Failed",
+        noPermission: "No Permission",
+        error: "Error",
+
+        // Loading
+        loadingData: "Loading data from servers...",
+    },
+    ja: {
+        title: "P4 ユーザーダッシュボード",
+        servers: "サーバー",
+        uniqueUsers: "ユニークユーザー",
+        accounts: "アカウント",
+        licensed: "ライセンス",
+        refresh: "更新",
+        refreshing: "更新中...",
+
+        tabUsers: "ユーザー",
+        tabServers: "サーバー",
+        tabConfig: "設定",
+
+        email: "メール",
+        displayName: "表示名",
+        accountCount: "アカウント数",
+        serverCount: "サーバー数",
+        latestAccess: "最終アクセス",
+        oldestLatestAccess: "最古の最終アクセス",
+        types: "タイプ",
+
+        searchPlaceholder: "検索...",
+        allServers: "全サーバー",
+        any: "全て",
+        all: "全て",
+        newerThan: "以内",
+        olderThan: "以上",
+
+        lt7days: "7日以内",
+        lt30days: "30日以内",
+        lt90days: "90日以内",
+        gt30days: "30日以上",
+        gt60days: "60日以上",
+        gt90days: "90日以上",
+        gt180days: "180日以上",
+        gt365days: "365日以上",
+
+        standard: "標準",
+        service: "サービス",
+        operator: "オペレーター",
+
+        username: "ユーザー名",
+        fullName: "氏名",
+        server: "サーバー",
+        lastAccess: "最終アクセス",
+        updated: "更新日",
+        type: "タイプ",
+        actions: "操作",
+        edit: "編集",
+        delete: "削除",
+
+        showingOf: function(shown, total) { return total + " 件中 " + shown + " 件を表示"; },
+
+        name: "名前",
+        connection: "接続先",
+        licensedSlots: "ライセンス数",
+        usedSlots: "使用数",
+        utilization: "使用率",
+        status: "ステータス",
+
+        dashboardConfig: "ダッシュボード設定",
+        licensedUniqueUsers: "ライセンスユニークユーザー数",
+        licensedDesc: "全サーバーの合計ライセンス数（トップバーの表示用）",
+        serversHeading: "サーバー",
+        portLabel: "ポート（ホスト:ポート）",
+        user: "ユーザー",
+        addServer: "＋ サーバー追加",
+        saveConfig: "設定を保存",
+        configSaved: "設定を保存しました。",
+        test: "テスト",
+        remove: "削除",
+        testing: "テスト中...",
+
+        editUser: "ユーザー編集",
+        onServer: "（サーバー：",
+        loadingDetails: "ユーザー情報を読み込み中...",
+        passwordReset: "パスワードリセット",
+        generateReset: "パスワードを生成してリセット",
+        resetAgain: "再リセット",
+        passwordDesc: "ランダムなパスワードを設定し、次回ログイン時に変更を要求します。",
+        tempPassword: "新しい一時パスワード（ユーザーに共有してください）：",
+        ssoNotice: function(method) { return "このアカウントはSSO認証（" + method + "）を使用しています。パスワードリセットは利用できません。"; },
+        saveChanges: "変更を保存",
+        cancel: "キャンセル",
+
+        deleteUser: "ユーザー削除",
+        deleteConfirm: function(user, server) { return 'サーバー「' + server + '」のユーザー「' + user + '」を削除しますか？この操作は元に戻せません。'; },
+
+        connected: "接続済み",
+        trustFailed: "信頼エラー",
+        authFailed: "認証エラー",
+        noPermission: "権限エラー",
+        error: "エラー",
+
+        loadingData: "サーバーからデータを読み込み中...",
+    }
+};
+
+var _currentLang = "en";
+
+function t(key) {
+    var lang = (typeof app !== "undefined") ? app.lang : _currentLang;
+    return LANG[lang][key] || LANG.en[key] || key;
+}
+
+// ---------------------------------------------------------------------------
 // Utilities
 // ---------------------------------------------------------------------------
 
@@ -64,6 +284,7 @@ const app = {
     serverSort: { key: "name", dir: "asc" },
     expandedEmails: new Set(),
     serverFilter: "",  // set when clicking a server row
+    lang: "en",
 
     // Processed user rows (computed once, filtered/sorted on demand)
     processedUsers: [],
@@ -92,7 +313,7 @@ app.load = async function () {
 app.refreshAll = async function () {
     const btn = document.getElementById("btn-refresh");
     btn.disabled = true;
-    btn.textContent = "Refreshing...";
+    btn.textContent = t("refreshing");
     try {
         const res = await fetch("/api/refresh", { method: "POST" });
         if (!res.ok) throw new Error("Refresh failed");
@@ -105,7 +326,7 @@ app.refreshAll = async function () {
         app.showError("Refresh failed: " + err.message);
     } finally {
         btn.disabled = false;
-        btn.textContent = "Refresh";
+        btn.textContent = t("refresh");
     }
 };
 
@@ -181,7 +402,7 @@ app.updateTopBar = function () {
 
     const statsServers = document.getElementById("stat-servers");
     statsServers.textContent = "";
-    statsServers.append("Servers: ");
+    statsServers.append(t("servers") + ": ");
     const serversStrong = document.createElement("strong");
     serversStrong.textContent = connectedCount + " / " + serverNames.length;
     statsServers.appendChild(serversStrong);
@@ -202,14 +423,14 @@ app.updateTopBar = function () {
 
     const statsUsers = document.getElementById("stat-users");
     statsUsers.textContent = "";
-    statsUsers.append("Unique Users: ");
+    statsUsers.append(t("uniqueUsers") + ": ");
     const usersStrong = document.createElement("strong");
     usersStrong.textContent = standardEmails.size;
     statsUsers.appendChild(usersStrong);
 
     const statsAccounts = document.getElementById("stat-accounts");
     statsAccounts.textContent = "";
-    statsAccounts.append("Accounts: ");
+    statsAccounts.append(t("accounts") + ": ");
     const accountsStrong = document.createElement("strong");
     accountsStrong.textContent = standardAccountCount;
     statsAccounts.appendChild(accountsStrong);
@@ -227,7 +448,7 @@ app.fetchLicensedCount = async function (uniqueCount) {
         if (cfg.licensedUniqueUsers) {
             const over = uniqueCount > cfg.licensedUniqueUsers;
             el.textContent = "";
-            el.append("Licensed: ");
+            el.append(t("licensed") + ": ");
             const strong = document.createElement("strong");
             strong.textContent = uniqueCount + " / " + cfg.licensedUniqueUsers;
             strong.className = over ? "text-red-400" : "text-green-400";
@@ -264,6 +485,248 @@ app.renderCurrentView = function () {
         case "users": app.renderUsers(); break;
         case "servers": app.renderServers(); break;
         case "config": app.renderConfig(); break;
+    }
+};
+
+// ---------------------------------------------------------------------------
+// Language Switching
+// ---------------------------------------------------------------------------
+
+app.setLanguage = function (lang) {
+    app.lang = lang;
+    _currentLang = lang;
+    var sel = document.getElementById("lang-select");
+    if (sel) sel.value = lang;
+    app.applyLanguage();
+    app.renderCurrentView();
+};
+
+app.applyLanguage = function () {
+    // Page title
+    document.querySelector("#top-bar h1").textContent = t("title");
+
+    // Tab buttons
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        var view = btn.dataset.view;
+        if (view === "users") btn.textContent = t("tabUsers");
+        else if (view === "servers") btn.textContent = t("tabServers");
+        else if (view === "config") btn.textContent = t("tabConfig");
+    });
+
+    // Top bar stat labels (preserve the <strong> content)
+    var statServers = document.getElementById("stat-servers");
+    var serversStrong = statServers.querySelector("strong");
+    if (serversStrong) {
+        var val = serversStrong.textContent;
+        statServers.textContent = "";
+        statServers.append(t("servers") + ": ");
+        var s = document.createElement("strong");
+        s.textContent = val;
+        statServers.appendChild(s);
+    }
+
+    var statUsers = document.getElementById("stat-users");
+    var usersStrong = statUsers.querySelector("strong");
+    if (usersStrong) {
+        var val = usersStrong.textContent;
+        statUsers.textContent = "";
+        statUsers.append(t("uniqueUsers") + ": ");
+        var s = document.createElement("strong");
+        s.textContent = val;
+        statUsers.appendChild(s);
+    }
+
+    var statAccounts = document.getElementById("stat-accounts");
+    var accountsStrong = statAccounts.querySelector("strong");
+    if (accountsStrong) {
+        var val = accountsStrong.textContent;
+        statAccounts.textContent = "";
+        statAccounts.append(t("accounts") + ": ");
+        var s = document.createElement("strong");
+        s.textContent = val;
+        statAccounts.appendChild(s);
+    }
+
+    var statLicensed = document.getElementById("stat-licensed");
+    var licensedStrong = statLicensed.querySelector("strong");
+    if (licensedStrong) {
+        var val = licensedStrong.textContent;
+        var cls = licensedStrong.className;
+        statLicensed.textContent = "";
+        statLicensed.append(t("licensed") + ": ");
+        var s = document.createElement("strong");
+        s.textContent = val;
+        s.className = cls;
+        statLicensed.appendChild(s);
+    }
+
+    // Refresh button
+    var refreshBtn = document.getElementById("btn-refresh");
+    if (!refreshBtn.disabled) {
+        refreshBtn.textContent = t("refresh");
+    }
+
+    // Loading text
+    var loadingP = document.querySelector("#loading p");
+    if (loadingP) loadingP.textContent = t("loadingData");
+
+    // Users table headers
+    var headerMap = {
+        email: "email",
+        displayName: "displayName",
+        accountCount: "accountCount",
+        serverCount: "serverCount",
+        latestAccess: "latestAccess",
+        oldestLatestAccess: "oldestLatestAccess",
+        types: "types",
+    };
+    document.querySelectorAll("#users-table thead .sortable").forEach(function (th) {
+        var sortKey = th.dataset.sort;
+        if (headerMap[sortKey]) {
+            th.textContent = t(headerMap[sortKey]);
+        }
+    });
+
+    // Users filter placeholders and options
+    var searchInput = document.getElementById("filter-search");
+    if (searchInput) searchInput.placeholder = t("searchPlaceholder");
+
+    // Server filter - update first option
+    var serverFilter = document.getElementById("filter-server");
+    if (serverFilter && serverFilter.options.length > 0) {
+        serverFilter.options[0].textContent = t("allServers");
+    }
+
+    // Date filter options
+    app.applyDateFilterLanguage("filter-latest");
+    app.applyDateFilterLanguage("filter-oldest");
+
+    // Type filter options
+    var typeFilter = document.getElementById("filter-type");
+    if (typeFilter) {
+        for (var i = 0; i < typeFilter.options.length; i++) {
+            var opt = typeFilter.options[i];
+            if (opt.value === "") opt.textContent = t("all");
+            else if (opt.value === "standard") opt.textContent = t("standard");
+            else if (opt.value === "service") opt.textContent = t("service");
+            else if (opt.value === "operator") opt.textContent = t("operator");
+        }
+    }
+
+    // Servers table headers
+    var serverHeaderMap = {
+        name: "name",
+        port: "connection",
+        licensedSlots: "licensedSlots",
+        usedSlots: "usedSlots",
+        utilization: "utilization",
+        totalAccounts: "accounts",
+        status: "status",
+    };
+    document.querySelectorAll("#servers-table thead .sortable").forEach(function (th) {
+        var sortKey = th.dataset.sort;
+        if (serverHeaderMap[sortKey]) {
+            th.textContent = t(serverHeaderMap[sortKey]);
+        }
+    });
+
+    // Config view static labels
+    var configHeading = document.querySelector("#view-config h2");
+    if (configHeading) configHeading.textContent = t("dashboardConfig");
+
+    var configLicensedLabel = document.querySelector("#view-config .filter-label");
+    if (configLicensedLabel) configLicensedLabel.textContent = t("licensedUniqueUsers");
+
+    var configLicensedDesc = document.querySelector("#view-config .text-xs.text-gray-500");
+    if (configLicensedDesc) configLicensedDesc.textContent = t("licensedDesc");
+
+    var configServersHeading = document.querySelector("#view-config h3");
+    if (configServersHeading) configServersHeading.textContent = t("serversHeading");
+
+    // Config table headers
+    var configThs = document.querySelectorAll("#view-config .data-table thead th");
+    if (configThs.length >= 4) {
+        configThs[0].textContent = t("name");
+        configThs[1].textContent = t("portLabel");
+        configThs[2].textContent = t("user");
+        configThs[3].textContent = t("actions");
+    }
+
+    // Config buttons
+    var addServerBtn = document.querySelector('#view-config .btn-secondary[onclick="app.configAddServer()"]');
+    if (addServerBtn) addServerBtn.textContent = t("addServer");
+    var saveConfigBtn = document.querySelector('#view-config .btn-primary[onclick="app.configSave()"]');
+    if (saveConfigBtn) saveConfigBtn.textContent = t("saveConfig");
+
+    // Edit modal static labels
+    var editTitle = document.querySelector("#edit-overlay h3");
+    if (editTitle) editTitle.textContent = t("editUser");
+    var editLoadingDiv = document.getElementById("edit-loading");
+    if (editLoadingDiv) editLoadingDiv.textContent = t("loadingDetails");
+
+    var editLabels = document.querySelectorAll("#edit-form .filter-label");
+    if (editLabels.length >= 2) {
+        editLabels[0].textContent = t("fullName");
+        editLabels[1].textContent = t("email");
+    }
+
+    var pwLabel = document.querySelector("#edit-password-section .filter-label");
+    if (pwLabel) pwLabel.textContent = t("passwordReset");
+
+    var pwDesc = document.querySelector("#edit-password-section .text-xs.text-gray-500");
+    if (pwDesc) pwDesc.textContent = t("passwordDesc");
+
+    var pwResultLabel = document.querySelector("#edit-password-result .text-xs.text-gray-400");
+    if (pwResultLabel) pwResultLabel.textContent = t("tempPassword");
+
+    var editSaveBtn = document.getElementById("edit-save-btn");
+    if (editSaveBtn) editSaveBtn.textContent = t("saveChanges");
+
+    // Cancel buttons in modals
+    document.querySelectorAll("#edit-overlay .btn-secondary").forEach(function (btn) {
+        if (btn.getAttribute("onclick") === "app.editClose()") {
+            btn.textContent = t("cancel");
+        }
+    });
+    document.querySelectorAll("#modal-overlay .btn-secondary").forEach(function (btn) {
+        if (btn.getAttribute("onclick") === "app.modalClose()") {
+            btn.textContent = t("cancel");
+        }
+    });
+
+    // Delete modal confirm button
+    var modalConfirmBtn = document.getElementById("modal-confirm");
+    if (modalConfirmBtn) modalConfirmBtn.textContent = t("delete");
+};
+
+app.applyDateFilterLanguage = function (selectId) {
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    for (var i = 0; i < sel.options.length; i++) {
+        var opt = sel.options[i];
+        if (opt.value === "") opt.textContent = t("any");
+    }
+    var optgroups = sel.querySelectorAll("optgroup");
+    for (var g = 0; g < optgroups.length; g++) {
+        var og = optgroups[g];
+        // Determine if this is "Newer than" or "Older than" by checking first option value
+        var firstOpt = og.querySelector("option");
+        if (firstOpt && firstOpt.value.startsWith("lt")) {
+            og.label = t("newerThan");
+        } else {
+            og.label = t("olderThan");
+        }
+        // Update option text
+        var opts = og.querySelectorAll("option");
+        for (var oi = 0; oi < opts.length; oi++) {
+            var o = opts[oi];
+            var valMap = {
+                lt7: "lt7days", lt30: "lt30days", lt90: "lt90days",
+                gt30: "gt30days", gt60: "gt60days", gt90: "gt90days",
+                gt180: "gt180days", gt365: "gt365days",
+            };
+            if (valMap[o.value]) o.textContent = t(valMap[o.value]);
+        }
     }
 };
 
@@ -389,7 +852,7 @@ app.renderUsers = function () {
         serverSelect.textContent = "";
         var allOpt = document.createElement("option");
         allOpt.value = "";
-        allOpt.textContent = "All Servers";
+        allOpt.textContent = t("allServers");
         serverSelect.appendChild(allOpt);
         for (var si = 0; si < serverNames.length; si++) {
             var opt = document.createElement("option");
@@ -456,7 +919,7 @@ app.renderUsers = function () {
 
     // User count
     document.getElementById("user-count").textContent =
-        "Showing " + rows.length + " of " + app.processedUsers.length + " users";
+        t("showingOf")(rows.length, app.processedUsers.length);
 };
 
 app.toggleUserRow = function (email) {
@@ -480,7 +943,7 @@ app.appendUserDetailRow = function (tbody, row) {
     // Header
     var thead = document.createElement("thead");
     var headerTr = document.createElement("tr");
-    var headers = ["Username", "Full Name", "Server", "Last Access", "Updated", "Type", "Actions"];
+    var headers = [t("username"), t("fullName"), t("server"), t("lastAccess"), t("updated"), t("type"), t("actions")];
     for (var h = 0; h < headers.length; h++) {
         var th = document.createElement("th");
         th.textContent = headers[h];
@@ -515,7 +978,7 @@ app.appendUserDetailRow = function (tbody, row) {
 
         var editBtn = document.createElement("button");
         editBtn.className = "btn-secondary btn-sm";
-        editBtn.textContent = "Edit";
+        editBtn.textContent = t("edit");
         editBtn.onclick = (function (server, username, fullName, email) {
             return function (e) {
                 e.stopPropagation();
@@ -526,7 +989,7 @@ app.appendUserDetailRow = function (tbody, row) {
 
         var deleteBtn = document.createElement("button");
         deleteBtn.className = "btn-danger btn-sm";
-        deleteBtn.textContent = "Delete";
+        deleteBtn.textContent = t("delete");
         deleteBtn.onclick = (function (server, username) {
             return function (e) {
                 e.stopPropagation();
@@ -670,14 +1133,14 @@ app.doPasswordReset = async function () {
         if (result.success) {
             document.getElementById("edit-new-password").textContent = pw;
             document.getElementById("edit-password-result").classList.remove("hidden");
-            btn.textContent = "Reset Again";
+            btn.textContent = t("resetAgain");
         } else {
             app.showError("Password reset failed: " + (result.error || "Unknown error"));
-            btn.textContent = "Generate & Reset Password";
+            btn.textContent = t("generateReset");
         }
     } catch (err) {
         app.showError("Password reset failed: " + err.message);
-        btn.textContent = "Generate & Reset Password";
+        btn.textContent = t("generateReset");
     } finally {
         btn.disabled = false;
     }
@@ -689,9 +1152,8 @@ app.editClose = function () {
 };
 
 app.confirmDeleteUser = function (server, username) {
-    document.getElementById("modal-title").textContent = "Delete User";
-    document.getElementById("modal-body").textContent =
-        "Are you sure you want to delete user \"" + username + "\" from server \"" + server + "\"? This cannot be undone.";
+    document.getElementById("modal-title").textContent = t("deleteUser");
+    document.getElementById("modal-body").textContent = t("deleteConfirm")(username, server);
     document.getElementById("modal-confirm").onclick = function () {
         app.deleteUser(server, username);
     };
@@ -967,7 +1429,7 @@ app.renderConfigServers = function () {
 
         var testBtn = document.createElement("button");
         testBtn.className = "btn-secondary btn-sm";
-        testBtn.textContent = "Test";
+        testBtn.textContent = t("test");
         testBtn.onclick = (function (idx, btn) {
             return function () { app.configTestServer(idx, btn); };
         })(i, testBtn);
@@ -975,7 +1437,7 @@ app.renderConfigServers = function () {
 
         var removeBtn = document.createElement("button");
         removeBtn.className = "btn-danger btn-sm";
-        removeBtn.textContent = "Remove";
+        removeBtn.textContent = t("remove");
         removeBtn.onclick = (function (idx) {
             return function () { app.configRemoveServer(idx); };
         })(i);
@@ -1004,7 +1466,7 @@ app.configTestServer = async function (idx, btn) {
     var name = row.querySelector('[data-field="name"]').value;
 
     btn.disabled = true;
-    btn.textContent = "Testing...";
+    btn.textContent = t("testing");
 
     try {
         var res = await fetch(
@@ -1013,11 +1475,11 @@ app.configTestServer = async function (idx, btn) {
         );
         var result = await res.json();
         var labels = {
-            "connected": "Connected",
-            "trust_failed": "Trust Failed",
-            "auth_failed": "Auth Failed",
-            "permission_denied": "No Permission",
-            "error": "Error",
+            "connected": t("connected"),
+            "trust_failed": t("trustFailed"),
+            "auth_failed": t("authFailed"),
+            "permission_denied": t("noPermission"),
+            "error": t("error"),
         };
         btn.textContent = labels[result.status] || result.status;
         btn.classList.remove("btn-secondary", "btn-primary", "btn-danger");
@@ -1030,7 +1492,7 @@ app.configTestServer = async function (idx, btn) {
             }
         }
     } catch (err) {
-        btn.textContent = "Error";
+        btn.textContent = t("error");
         app.showError("Test failed: " + err.message);
     } finally {
         btn.disabled = false;
@@ -1068,7 +1530,7 @@ app.configSave = async function () {
         });
         var result = await res.json();
         if (result.success) {
-            statusEl.textContent = "Configuration saved.";
+            statusEl.textContent = t("configSaved");
             statusEl.className = "mt-3 text-sm text-green-400";
             statusEl.classList.remove("hidden");
             app.configData = payload;
