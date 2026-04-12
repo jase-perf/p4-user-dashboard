@@ -110,15 +110,22 @@ class P4Connector:
         Uses 'p4 license -u' which reports:
         - userLimit: the licensed seat capacity (int or "unlimited")
         - userCount: the number of active license-consuming users
+
+        On unlicensed servers, userCount is unreliable (returns ">5"
+        regardless of actual count), so we fall back to counting users
+        directly via 'p4 users'.
         """
         try:
             license_info = self._p4.run("license", "-u")
             licensed_slots = None
             used_slots = None
+            is_licensed = True
             if license_info:
                 for entry in license_info:
                     if not isinstance(entry, dict):
                         continue
+                    if entry.get("isLicensed") == "no":
+                        is_licensed = False
                     # License capacity from userLimit
                     if "userLimit" in entry:
                         raw = str(entry["userLimit"]).strip()
@@ -127,13 +134,17 @@ class P4Connector:
                                 licensed_slots = int(raw)
                             except ValueError:
                                 pass
-                    # Active user count from userCount
-                    if "userCount" in entry:
+                    # Active user count from userCount (only trust on licensed servers)
+                    if is_licensed and "userCount" in entry:
                         raw = str(entry["userCount"]).lstrip(">").strip()
                         try:
                             used_slots = int(raw)
                         except ValueError:
                             pass
+            # On unlicensed servers, count standard users directly
+            if not is_licensed:
+                users = self._p4.run("users")
+                used_slots = len([u for u in users if u.get("Type", "standard") == "standard"])
             return {"licensedSlots": licensed_slots, "usedSlots": used_slots}
         except P4Exception:
             return {"licensedSlots": None, "usedSlots": None}
