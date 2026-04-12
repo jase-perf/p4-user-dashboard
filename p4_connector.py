@@ -10,7 +10,11 @@ class P4Connector:
         self._p4 = P4()
 
     def connect(self) -> dict:
-        """Connect to the P4 server. Returns status dict."""
+        """Connect to the P4 server. Returns status dict.
+
+        Automatically detects unicode-mode servers and sets charset
+        so the dashboard works with a mix of unicode and non-unicode servers.
+        """
         self._p4.port = self.port
         if self.user:
             self._p4.user = self.user
@@ -19,6 +23,14 @@ class P4Connector:
             return {"status": "connected"}
         except P4Exception as e:
             error_msg = str(e)
+            # If the server requires unicode, retry with charset set
+            if "unicode" in error_msg.lower() and "charset" in error_msg.lower():
+                try:
+                    self._p4.charset = "utf8"
+                    self._p4.connect()
+                    return {"status": "connected"}
+                except P4Exception as e2:
+                    error_msg = str(e2)
             if "password" in error_msg.lower() or "login" in error_msg.lower() or "ticket" in error_msg.lower():
                 return {"status": "auth_failed", "error": error_msg}
             return {"status": "error", "error": error_msg}

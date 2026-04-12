@@ -21,15 +21,15 @@ class TestP4Connector:
         conn.disconnect()
 
         usernames = [u["User"] for u in users]
-        assert "alice" in usernames
-        assert "bob" in usernames
+        assert "t.tanaka" in usernames
+        assert "y.suzuki" in usernames
         assert "svc-build" in usernames
 
-        alice = next(u for u in users if u["User"] == "alice")
-        assert "Email" in alice
-        assert "FullName" in alice
-        assert "Access" in alice
-        assert "Type" in alice
+        tanaka = next(u for u in users if u["User"] == "t.tanaka")
+        assert "Email" in tanaka
+        assert "FullName" in tanaka
+        assert "Access" in tanaka
+        assert "Type" in tanaka
 
     def test_fetch_users_includes_service(self, test_servers):
         conn = P4Connector("localhost:1701", user="super")
@@ -39,36 +39,36 @@ class TestP4Connector:
 
         types = {u["User"]: u["Type"] for u in users}
         assert types["svc-build"] == "service"
-        assert types["alice"] == "standard"
+        assert types["t.tanaka"] == "standard"
 
     def test_delete_user(self, test_servers):
         conn = P4Connector("localhost:1701", user="super")
         conn.connect()
 
-        result = conn.delete_user("eve")
+        result = conn.delete_user("y.honda")
         assert result["success"] is True
 
         users = conn.fetch_users()
         usernames = [u["User"] for u in users]
-        assert "eve" not in usernames
+        assert "y.honda" not in usernames
 
-        # Recreate eve for other tests
-        conn.create_user("eve", "Eve Watanabe", "eve@example.com", "standard")
+        # Recreate for other tests
+        conn.create_user("y.honda", "本田 祐子 (Honda Yuko)", "yuko.honda@bandainamco.example.com", "standard")
         conn.disconnect()
 
     def test_edit_user(self, test_servers):
         conn = P4Connector("localhost:1701", user="super")
         conn.connect()
 
-        result = conn.edit_user("david", full_name="David S. Suzuki")
+        result = conn.edit_user("d.ogawa", full_name="小川 大地 - Updated")
         assert result["success"] is True
 
         users = conn.fetch_users()
-        david = next(u for u in users if u["User"] == "david")
-        assert david["FullName"] == "David S. Suzuki"
+        ogawa = next(u for u in users if u["User"] == "d.ogawa")
+        assert ogawa["FullName"] == "小川 大地 - Updated"
 
         # Restore original
-        conn.edit_user("david", full_name="David Suzuki")
+        conn.edit_user("d.ogawa", full_name="小川 大地 (Ogawa Daichi)")
         conn.disconnect()
 
     def test_test_connection(self, test_servers):

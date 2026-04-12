@@ -27,9 +27,9 @@ def test_servers():
         return
 
     yield {
-        "tokyo-main": {"port": "localhost:1711", "user": "super", "name": "tokyo-main"},
-        "osaka-dev": {"port": "localhost:1712", "user": "super", "name": "osaka-dev"},
-        "nagoya-art": {"port": "localhost:1713", "user": "super", "name": "nagoya-art"},
+        "tokyo-main": {"port": "localhost:1701", "user": "super", "name": "tokyo-main"},
+        "osaka-dev": {"port": "localhost:1702", "user": "super", "name": "osaka-dev"},
+        "nagoya-art": {"port": "localhost:1703", "user": "super", "name": "nagoya-art"},
     }
     try:
         subprocess.run(["bash", script, "--teardown"], check=True, capture_output=True, text=True)

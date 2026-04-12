@@ -19,9 +19,10 @@ class TestDataEndpoint:
         assert "users" in data
         assert "servers" in data
         assert len(data["users"]) > 0
-        assert "alice@example.com" in data["users"]
-        alice = data["users"]["alice@example.com"]
-        assert len(alice["accounts"]) >= 3
+        # t.tanaka is on all 3 servers (+ admin account on tokyo-main)
+        assert "takeshi.tanaka@bandainamco.example.com" in data["users"]
+        tanaka = data["users"]["takeshi.tanaka@bandainamco.example.com"]
+        assert len(tanaka["accounts"]) >= 3
 
     def test_get_data_servers(self, client):
         resp = client.get("/api/data")
@@ -51,8 +52,8 @@ class TestRefreshEndpoint:
 class TestUserActions:
     def test_edit_user(self, client):
         resp = client.put(
-            "/api/servers/tokyo-main/users/david",
-            json={"fullName": "David S. Suzuki"},
+            "/api/servers/tokyo-main/users/d.ogawa",
+            json={"fullName": "小川 大地 - Updated"},
         )
         assert resp.status_code == 200
         result = resp.json()
@@ -60,12 +61,12 @@ class TestUserActions:
 
         # Restore
         client.put(
-            "/api/servers/tokyo-main/users/david",
-            json={"fullName": "David Suzuki"},
+            "/api/servers/tokyo-main/users/d.ogawa",
+            json={"fullName": "小川 大地 (Ogawa Daichi)"},
         )
 
     def test_delete_user(self, client):
-        resp = client.delete("/api/servers/tokyo-main/users/eve")
+        resp = client.delete("/api/servers/tokyo-main/users/y.honda")
         assert resp.status_code == 200
         result = resp.json()
         assert result["success"] is True
@@ -74,7 +75,7 @@ class TestUserActions:
         from p4_connector import P4Connector
         conn = P4Connector("localhost:1701", user="super")
         conn.connect()
-        conn.create_user("eve", "Eve Watanabe", "eve@example.com")
+        conn.create_user("y.honda", "本田 祐子 (Honda Yuko)", "yuko.honda@bandainamco.example.com")
         conn.disconnect()
 
 
