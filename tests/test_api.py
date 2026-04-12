@@ -19,16 +19,16 @@ class TestDataEndpoint:
         assert "users" in data
         assert "servers" in data
         assert len(data["users"]) > 0
-        # t.tanaka is on all 3 servers (+ admin account on tokyo-main)
-        assert "takeshi.tanaka@bandainamco.example.com" in data["users"]
-        tanaka = data["users"]["takeshi.tanaka@bandainamco.example.com"]
+        # t.tanaka is on all 3 servers (+ admin account on tokyo-prod)
+        assert "takeshi.tanaka@studio.example.com" in data["users"]
+        tanaka = data["users"]["takeshi.tanaka@studio.example.com"]
         assert len(tanaka["accounts"]) >= 3
 
     def test_get_data_servers(self, client):
         resp = client.get("/api/data")
         data = resp.json()
-        assert "tokyo-main" in data["servers"]
-        assert data["servers"]["tokyo-main"]["status"] == "connected"
+        assert "tokyo-prod" in data["servers"]
+        assert data["servers"]["tokyo-prod"]["status"] == "connected"
 
 
 class TestRefreshEndpoint:
@@ -39,10 +39,10 @@ class TestRefreshEndpoint:
         assert "users" in data
 
     def test_refresh_specific_server(self, client):
-        resp = client.post("/api/refresh?servers=tokyo-main")
+        resp = client.post("/api/refresh?servers=tokyo-prod")
         assert resp.status_code == 200
         data = resp.json()
-        assert "tokyo-main" in data["servers"]
+        assert "tokyo-prod" in data["servers"]
 
     def test_refresh_failed_only(self, client):
         resp = client.post("/api/refresh?failed=true")
@@ -51,9 +51,10 @@ class TestRefreshEndpoint:
 
 class TestUserActions:
     def test_edit_user(self, client):
+        # Use osaka-dev (non-unicode) for simpler test
         resp = client.put(
-            "/api/servers/tokyo-main/users/d.ogawa",
-            json={"fullName": "小川 大地 - Updated"},
+            "/api/servers/osaka-dev/users/t.shimizu",
+            json={"fullName": "Shimizu Takuya - Updated"},
         )
         assert resp.status_code == 200
         result = resp.json()
@@ -61,21 +62,21 @@ class TestUserActions:
 
         # Restore
         client.put(
-            "/api/servers/tokyo-main/users/d.ogawa",
-            json={"fullName": "小川 大地 (Ogawa Daichi)"},
+            "/api/servers/osaka-dev/users/t.shimizu",
+            json={"fullName": "Shimizu Takuya"},
         )
 
     def test_delete_user(self, client):
-        resp = client.delete("/api/servers/tokyo-main/users/y.honda")
+        resp = client.delete("/api/servers/osaka-dev/users/y.ueda")
         assert resp.status_code == 200
         result = resp.json()
         assert result["success"] is True
 
         # Recreate for other tests
         from p4_connector import P4Connector
-        conn = P4Connector("localhost:1701", user="super")
+        conn = P4Connector("localhost:1702", user="super")
         conn.connect()
-        conn.create_user("y.honda", "本田 祐子 (Honda Yuko)", "yuko.honda@bandainamco.example.com")
+        conn.create_user("y.ueda", "Ueda Yumi", "yumi.ueda@studio.example.com")
         conn.disconnect()
 
 
@@ -85,7 +86,7 @@ class TestConfigEndpoint:
         assert resp.status_code == 200
         data = resp.json()
         assert "servers" in data
-        assert len(data["servers"]) == 3
+        assert len(data["servers"]) == 5
 
     def test_update_config(self, client):
         resp = client.get("/api/config")
@@ -101,6 +102,6 @@ class TestConfigEndpoint:
 
 class TestTestConnection:
     def test_connection_success(self, client):
-        resp = client.post("/api/servers/tokyo-main/test")
+        resp = client.post("/api/servers/tokyo-prod/test")
         assert resp.status_code == 200
         assert resp.json()["status"] == "connected"

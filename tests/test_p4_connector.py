@@ -4,6 +4,14 @@ from p4_connector import P4Connector
 
 class TestP4Connector:
     def test_connect_success(self, test_servers):
+        # Use non-unicode server for basic tests
+        conn = P4Connector("localhost:1702", user="super")
+        result = conn.connect()
+        assert result["status"] == "connected"
+        conn.disconnect()
+
+    def test_connect_unicode_server(self, test_servers):
+        # Unicode server should auto-detect and connect
         conn = P4Connector("localhost:1701", user="super")
         result = conn.connect()
         assert result["status"] == "connected"
@@ -15,7 +23,7 @@ class TestP4Connector:
         assert result["status"] in ("auth_failed", "error")
 
     def test_fetch_users(self, test_servers):
-        conn = P4Connector("localhost:1701", user="super")
+        conn = P4Connector("localhost:1702", user="super")
         conn.connect()
         users = conn.fetch_users()
         conn.disconnect()
@@ -23,7 +31,7 @@ class TestP4Connector:
         usernames = [u["User"] for u in users]
         assert "t.tanaka" in usernames
         assert "y.suzuki" in usernames
-        assert "svc-build" in usernames
+        assert "svc-deploy" in usernames
 
         tanaka = next(u for u in users if u["User"] == "t.tanaka")
         assert "Email" in tanaka
@@ -31,47 +39,63 @@ class TestP4Connector:
         assert "Access" in tanaka
         assert "Type" in tanaka
 
-    def test_fetch_users_includes_service(self, test_servers):
+    def test_fetch_users_unicode_server(self, test_servers):
+        # Verify fetching from unicode server works with Japanese names
         conn = P4Connector("localhost:1701", user="super")
+        conn.connect()
+        users = conn.fetch_users()
+        conn.disconnect()
+
+        usernames = [u["User"] for u in users]
+        assert "t.tanaka" in usernames
+        assert "svc-build" in usernames
+
+    def test_fetch_users_includes_service(self, test_servers):
+        conn = P4Connector("localhost:1702", user="super")
         conn.connect()
         users = conn.fetch_users()
         conn.disconnect()
 
         types = {u["User"]: u["Type"] for u in users}
-        assert types["svc-build"] == "service"
+        assert types["svc-deploy"] == "service"
         assert types["t.tanaka"] == "standard"
 
     def test_delete_user(self, test_servers):
-        conn = P4Connector("localhost:1701", user="super")
+        conn = P4Connector("localhost:1702", user="super")
         conn.connect()
 
-        result = conn.delete_user("y.honda")
+        result = conn.delete_user("y.ueda")
         assert result["success"] is True
 
         users = conn.fetch_users()
         usernames = [u["User"] for u in users]
-        assert "y.honda" not in usernames
+        assert "y.ueda" not in usernames
 
         # Recreate for other tests
-        conn.create_user("y.honda", "本田 祐子 (Honda Yuko)", "yuko.honda@bandainamco.example.com", "standard")
+        conn.create_user("y.ueda", "Ueda Yumi", "yumi.ueda@studio.example.com", "standard")
         conn.disconnect()
 
     def test_edit_user(self, test_servers):
-        conn = P4Connector("localhost:1701", user="super")
+        conn = P4Connector("localhost:1702", user="super")
         conn.connect()
 
-        result = conn.edit_user("d.ogawa", full_name="小川 大地 - Updated")
+        result = conn.edit_user("t.shimizu", full_name="Shimizu Takuya - Updated")
         assert result["success"] is True
 
         users = conn.fetch_users()
-        ogawa = next(u for u in users if u["User"] == "d.ogawa")
-        assert ogawa["FullName"] == "小川 大地 - Updated"
+        shimizu = next(u for u in users if u["User"] == "t.shimizu")
+        assert shimizu["FullName"] == "Shimizu Takuya - Updated"
 
         # Restore original
-        conn.edit_user("d.ogawa", full_name="小川 大地 (Ogawa Daichi)")
+        conn.edit_user("t.shimizu", full_name="Shimizu Takuya")
         conn.disconnect()
 
     def test_test_connection(self, test_servers):
+        conn = P4Connector("localhost:1702", user="super")
+        result = conn.test_connection()
+        assert result["status"] == "connected"
+
+    def test_test_connection_unicode(self, test_servers):
         conn = P4Connector("localhost:1701", user="super")
         result = conn.test_connection()
         assert result["status"] == "connected"

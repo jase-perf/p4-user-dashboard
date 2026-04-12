@@ -1,10 +1,11 @@
 """Modify P4D user access times via checkpoint editing.
 
 Called by setup_test_servers.sh after creating users and stopping servers.
-Usage: python3 set_access_times.py PORT1 PORT2 PORT3
+Usage: python3 set_access_times.py PORT1 PORT2 PORT3 [PORT4 PORT5 ...]
 """
 
 import glob
+import os
 import re
 import subprocess
 import sys
@@ -16,7 +17,7 @@ NOW = int(time.time())
 # How many days ago each user last accessed each server.
 # Users not listed keep today's access time.
 ACCESS_AGES = {
-    1: {  # tokyo-main
+    1: {  # tokyo-prod
         "t.tanaka": 1 * DAY,
         "t.tanaka-admin": 200 * DAY,
         "y.suzuki": 3 * DAY,
@@ -31,7 +32,10 @@ ACCESS_AGES = {
         "j.morita": 250 * DAY,
         "e.fujita": 10 * DAY,
         "t.kato": 180 * DAY,
-        "y.honda": 60 * DAY,
+        "j.chen": 3 * DAY,
+        "p.kumar": 20 * DAY,
+        "m.garcia": 90 * DAY,
+        "s.williams": 15 * DAY,
     },
     2: {  # osaka-dev
         "t.tanaka": 2 * DAY,
@@ -45,7 +49,9 @@ ACCESS_AGES = {
         "s.hashimoto": 150 * DAY,
         "y.ueda": 60 * DAY,
         "t.shimizu": 10 * DAY,
-        "a.mori": 2 * DAY,
+        "j.chen": 1 * DAY,
+        "a.petrov": 5 * DAY,
+        "l.nguyen": 2 * DAY,
     },
     3: {  # nagoya-art
         "t.tanaka": 5 * DAY,
@@ -58,31 +64,54 @@ ACCESS_AGES = {
         "k.endo": 1 * DAY,
         "n.hayashi": 14 * DAY,
         "y.inoue": 365 * DAY,
+        "m.garcia": 10 * DAY,
+        "s.williams": 3 * DAY,
+    },
+    4: {  # seoul-mobile
+        "t.tanaka": 30 * DAY,
+        "y.suzuki": 45 * DAY,
+        "j.kim": 1 * DAY,
+        "m.park": 2 * DAY,
+        "s.lee": 1 * DAY,
+        "h.choi": 5 * DAY,
+        "y.jung": 3 * DAY,
+        "p.kumar": 7 * DAY,
+        "l.nguyen": 1 * DAY,
+        "a.petrov": 60 * DAY,
+    },
+    5: {  # singapore-qa
+        "t.tanaka": 14 * DAY,
+        "r.ito": 3 * DAY,
+        "p.kumar": 1 * DAY,
+        "l.nguyen": 2 * DAY,
+        "w.tan": 1 * DAY,
+        "a.rahman": 5 * DAY,
+        "j.santos": 10 * DAY,
+        "d.silva": 30 * DAY,
     },
 }
 
 PATTERN = re.compile(r"(@pv@ 8 @db.user@ @)([^@]*)(@ @.*?@ @@ )(\d+) (\d+)( @)")
+NAMES = ["tokyo-prod", "osaka-dev", "nagoya-art", "seoul-mobile", "singapore-qa"]
 
 
 def modify_server(idx: int, port: int) -> None:
     root = f"/tmp/p4d-test-{idx}"
     checkpoint = f"{root}/checkpoint_edit"
-    names = ["tokyo-main", "osaka-dev", "nagoya-art"]
+    name = NAMES[idx - 1] if idx <= len(NAMES) else f"server-{idx}"
 
     result = subprocess.run(
         ["p4d", "-r", root, "-jd", checkpoint],
         capture_output=True, text=True,
     )
     if result.returncode != 0:
-        print(f"  ERROR: checkpoint dump failed for {names[idx - 1]}: {result.stderr.strip()}")
-        # Start the server back up anyway
+        print(f"  ERROR: checkpoint dump failed for {name}: {result.stderr.strip()}")
         subprocess.run(
             ["p4d", "-p", str(port), "-r", root, "-d"],
             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
         return
 
-    import os
     os.chmod(checkpoint, 0o644)
 
     with open(checkpoint, "r") as f:
@@ -107,7 +136,6 @@ def modify_server(idx: int, port: int) -> None:
     with open(checkpoint, "w") as f:
         f.writelines(modified)
 
-    # Remove db files and restore from modified checkpoint
     for dbfile in glob.glob(f"{root}/db.*"):
         os.remove(dbfile)
 
@@ -119,7 +147,7 @@ def modify_server(idx: int, port: int) -> None:
         ["p4d", "-p", str(port), "-r", root, "-d"],
         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )
-    print(f"  {names[idx - 1]}: {count} users modified, restarted on port {port}")
+    print(f"  {name}: {count} users modified, restarted on port {port}")
 
 
 def main() -> None:

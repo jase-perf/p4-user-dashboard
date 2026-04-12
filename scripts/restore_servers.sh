@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
 # Restore test servers from a previously saved snapshot.
 # Stops servers, rebuilds databases from checkpoint files, restarts.
 
-PORTS=(1701 1702 1703)
-NAMES=("tokyo-main" "osaka-dev" "nagoya-art")
+PORTS=(1701 1702 1703 1704 1705)
+NAMES=("tokyo-prod" "osaka-dev" "nagoya-art" "seoul-mobile" "singapore-qa")
 BASE_DIR="/tmp/p4d-test"
 SNAPSHOT_DIR="/tmp/p4d-snapshots"
 
@@ -41,8 +41,11 @@ for i in "${!PORTS[@]}"; do
     # Restart
     p4d -p "$port" -r "$root" -d </dev/null >/dev/null 2>&1
 
-    # Verify
-    count=$(P4PORT="localhost:$port" P4USER=super p4 users -a 2>/dev/null | wc -l)
+    # Verify (try with and without charset for unicode compatibility)
+    count=$(P4PORT="localhost:$port" P4USER=super P4CHARSET=utf8 p4 users -a 2>/dev/null | wc -l)
+    if [ "$count" = "0" ]; then
+        count=$(P4PORT="localhost:$port" P4USER=super p4 users -a 2>/dev/null | wc -l)
+    fi
     echo "  $name (port $port): restored ($count users)"
 done
 

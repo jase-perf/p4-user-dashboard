@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # Save a snapshot of the current test server state that can be restored later.
-# Creates checkpoint files in a snapshot directory.
+# Dumps checkpoints while servers are running (no stop/restart needed).
 
-PORTS=(1701 1702 1703)
-NAMES=("tokyo-main" "osaka-dev" "nagoya-art")
+PORTS=(1701 1702 1703 1704 1705)
+NAMES=("tokyo-prod" "osaka-dev" "nagoya-art" "seoul-mobile" "singapore-qa")
 BASE_DIR="/tmp/p4d-test"
 SNAPSHOT_DIR="/tmp/p4d-snapshots"
 
@@ -17,23 +17,18 @@ for i in "${!PORTS[@]}"; do
     root="$BASE_DIR-$((i+1))"
     snapshot="$SNAPSHOT_DIR/$name.ckp"
 
-    if ! p4 -p "localhost:$port" info >/dev/null 2>&1; then
-        echo "  $name (port $port): not running, skipping"
+    if [ ! -d "$root" ]; then
+        echo "  $name: no data directory, skipping"
         continue
     fi
 
-    # Stop the server to get a clean checkpoint
-    p4 -p "localhost:$port" -u super admin stop 2>/dev/null || true
-    sleep 0.5
-
-    # Dump checkpoint
-    p4d -r "$root" -jd "$snapshot" 2>/dev/null
-    chmod 644 "$snapshot"
-
-    # Restart the server
-    p4d -p "$port" -r "$root" -d </dev/null >/dev/null 2>&1
-
-    echo "  $name: snapshot saved to $snapshot"
+    # Dump checkpoint (works whether server is running or stopped)
+    if p4d -r "$root" -jd "$snapshot" >/dev/null 2>&1; then
+        chmod 644 "$snapshot"
+        echo "  $name: snapshot saved"
+    else
+        echo "  $name: ERROR — checkpoint dump failed"
+    fi
 done
 
 echo ""
