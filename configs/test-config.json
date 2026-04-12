@@ -1,0 +1,31 @@
+{
+  "port": 8181,
+  "licensedUniqueUsers": 10,
+  "servers": [
+    {
+      "name": "tokyo-main",
+      "port": "localhost:1701",
+      "user": "super"
+    },
+    {
+      "name": "osaka-dev",
+      "port": "localhost:1702",
+      "user": "super"
+    },
+    {
+      "name": "nagoya-art",
+      "port": "localhost:1703",
+      "user": "super"
+    },
+    {
+      "name": "jasakagaya",
+      "port": "192.168.68.33:1666",
+      "user": "jlindgren"
+    },
+    {
+      "name": "p4-demo",
+      "port": "ssl:p4.demo.perforce.rocks:1666",
+      "user": "jlindgren"
+    }
+  ]
+}

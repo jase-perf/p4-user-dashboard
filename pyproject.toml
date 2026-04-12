@@ -13,3 +13,8 @@ dependencies = [
 
 [project.scripts]
 p4-dashboard = "dashboard:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]

@@ -87,8 +87,21 @@ class P4Connector:
             return {"licensedSlots": None, "usedSlots": None}
 
     def test_connection(self) -> dict:
-        """Test if we can connect and authenticate to the server."""
+        """Test if we can connect and authenticate to the server.
+
+        Runs 'p4 info' after connecting to verify auth actually works,
+        since connect() only establishes a TCP socket.
+        """
         result = self.connect()
         if result["status"] == "connected":
-            self.disconnect()
+            try:
+                self._p4.run("info")
+            except P4Exception as e:
+                error_msg = str(e)
+                if "password" in error_msg.lower() or "login" in error_msg.lower() or "ticket" in error_msg.lower() or "trust" in error_msg.lower():
+                    result = {"status": "auth_failed", "error": error_msg}
+                else:
+                    result = {"status": "error", "error": error_msg}
+            finally:
+                self.disconnect()
         return result

@@ -873,7 +873,9 @@ app.configRemoveServer = function (idx) {
 };
 
 app.configTestServer = async function (idx, btn) {
-    // Read current name from the input
+    // Save config first so the server exists in the backend
+    await app.configSave();
+
     var row = document.querySelector('#config-servers-tbody tr[data-idx="' + idx + '"]');
     var name = row.querySelector('[data-field="name"]').value;
 
