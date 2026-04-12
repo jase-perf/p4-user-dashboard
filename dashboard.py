@@ -50,6 +50,19 @@ def _fetch_server_data(server: ServerConfig) -> dict:
                 **license_info,
             },
         }
+    except Exception as e:
+        error_msg = str(e)
+        status = "auth_failed" if "password" in error_msg.lower() or "login" in error_msg.lower() else "error"
+        return {
+            "users": [],
+            "server_info": {
+                "port": server.port,
+                "status": status,
+                "error": error_msg,
+                "licensedSlots": None,
+                "usedSlots": None,
+            },
+        }
     finally:
         conn.disconnect()
 
@@ -244,11 +257,11 @@ def main():
     config = load_config(config_path)
     port = config.port
 
-    print(f"Starting P4 User Dashboard on http://localhost:{port}")
-    webbrowser.open(f"http://localhost:{port}")
+    host = "0.0.0.0"
+    print(f"Starting P4 User Dashboard on http://0.0.0.0:{port}")
     uvicorn.run(
         create_app(config_path),
-        host="127.0.0.1",
+        host=host,
         port=port,
         log_level="info",
     )

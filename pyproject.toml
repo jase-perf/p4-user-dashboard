@@ -1,0 +1,15 @@
+[project]
+name = "p4-user-dashboard"
+version = "0.1.0"
+description = "Multi-server P4 user management dashboard"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.135.0",
+    "uvicorn>=0.44.0",
+    "jinja2>=3.1.0",
+    "p4python>=2025.2",
+    "httpx>=0.28.0",
+]
+
+[project.scripts]
+p4-dashboard = "dashboard:main"
