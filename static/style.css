@@ -191,9 +191,17 @@
     background-color: rgba(127, 29, 29, 0.5);
     color: #f87171;
 }
-.badge-auth-failed {
+.badge-auth-failed, .badge-auth_failed {
     background-color: rgba(113, 63, 18, 0.5);
     color: #facc15;
+}
+.badge-trust-failed, .badge-trust_failed {
+    background-color: rgba(113, 63, 18, 0.5);
+    color: #fb923c;
+}
+.badge-permission-denied, .badge-permission_denied {
+    background-color: rgba(113, 63, 18, 0.5);
+    color: #f59e0b;
 }
 
 /* Config table inputs */

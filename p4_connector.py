@@ -87,21 +87,39 @@ class P4Connector:
             return {"licensedSlots": None, "usedSlots": None}
 
     def test_connection(self) -> dict:
-        """Test if we can connect and authenticate to the server.
+        """Test connection with layered diagnostics.
 
-        Runs 'p4 info' after connecting to verify auth actually works,
-        since connect() only establishes a TCP socket.
+        Three checks, each building on the last:
+        1. TCP connect — can we reach the server at all?
+        2. p4 info — does it respond? catches trust/SSL issues
+        3. p4 users -m1 — does our user have permission to list users?
         """
+        # Step 1: TCP connect
         result = self.connect()
-        if result["status"] == "connected":
+        if result["status"] != "connected":
+            return result
+
+        try:
+            # Step 2: p4 info — verifies server responds, catches trust issues
             try:
                 self._p4.run("info")
             except P4Exception as e:
                 error_msg = str(e)
-                if "password" in error_msg.lower() or "login" in error_msg.lower() or "ticket" in error_msg.lower() or "trust" in error_msg.lower():
-                    result = {"status": "auth_failed", "error": error_msg}
-                else:
-                    result = {"status": "error", "error": error_msg}
-            finally:
-                self.disconnect()
-        return result
+                if "trust" in error_msg.lower() or "fingerprint" in error_msg.lower():
+                    return {"status": "trust_failed", "error": error_msg}
+                return {"status": "error", "error": error_msg}
+
+            # Step 3: p4 users -m1 — verifies auth and permissions
+            try:
+                self._p4.run("users", "-m1")
+            except P4Exception as e:
+                error_msg = str(e)
+                if "password" in error_msg.lower() or "login" in error_msg.lower() or "ticket" in error_msg.lower():
+                    return {"status": "auth_failed", "error": error_msg}
+                if "protect" in error_msg.lower() or "permission" in error_msg.lower():
+                    return {"status": "permission_denied", "error": error_msg}
+                return {"status": "error", "error": error_msg}
+
+            return {"status": "connected"}
+        finally:
+            self.disconnect()

@@ -888,16 +888,21 @@ app.configTestServer = async function (idx, btn) {
             { method: "POST" }
         );
         var result = await res.json();
+        var labels = {
+            "connected": "Connected",
+            "trust_failed": "Trust Failed",
+            "auth_failed": "Auth Failed",
+            "permission_denied": "No Permission",
+            "error": "Error",
+        };
+        btn.textContent = labels[result.status] || result.status;
+        btn.classList.remove("btn-secondary", "btn-primary", "btn-danger");
         if (result.status === "connected") {
-            btn.textContent = "Connected";
-            btn.classList.remove("btn-secondary");
             btn.classList.add("btn-primary");
         } else {
-            btn.textContent = result.status;
-            btn.classList.remove("btn-secondary");
             btn.classList.add("btn-danger");
             if (result.error) {
-                app.showError("Test failed: " + result.error);
+                app.showError(labels[result.status] + ": " + result.error);
             }
         }
     } catch (err) {
