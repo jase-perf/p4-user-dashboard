@@ -11,3 +11,5 @@ demo/bin/
 
 # User config files
 configs/
+.DS_Store
+._*
