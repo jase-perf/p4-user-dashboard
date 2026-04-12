@@ -289,16 +289,32 @@ app.applyFilters = function () {
     app.renderUsers();
 };
 
+app.parseDateFilter = function (val) {
+    // Parse filter values like "gt30", "lt7" into {op, days}
+    if (!val) return null;
+    var op = val.substring(0, 2);  // "gt" or "lt"
+    var days = parseInt(val.substring(2), 10);
+    return { op: op, days: days };
+};
+
+app.matchesDateFilter = function (timestamp, filter) {
+    if (!filter) return true;
+    var age = daysSince(timestamp);
+    if (filter.op === "gt") return age > filter.days;
+    if (filter.op === "lt") return age < filter.days;
+    return true;
+};
+
 app.getFilteredUsers = function () {
-    const searchVal = document.getElementById("filter-search").value.toLowerCase();
-    const inactiveDays = parseInt(document.getElementById("filter-inactive").value, 10);
-    const inactiveField = document.getElementById("filter-inactive-field").value;
-    const serverVal = document.getElementById("filter-server").value;
-    const typeVal = document.getElementById("filter-type").value;
+    var searchVal = document.getElementById("filter-search").value.toLowerCase();
+    var serverVal = document.getElementById("filter-server").value;
+    var latestFilter = app.parseDateFilter(document.getElementById("filter-latest").value);
+    var oldestFilter = app.parseDateFilter(document.getElementById("filter-oldest").value);
+    var typeVal = document.getElementById("filter-type").value;
 
-    let rows = app.processedUsers;
+    var rows = app.processedUsers;
 
-    // Text search
+    // Text search (searches email, display name, and usernames)
     if (searchVal) {
         rows = rows.filter(function (r) {
             if (r.email.toLowerCase().includes(searchVal)) return true;
@@ -309,19 +325,23 @@ app.getFilteredUsers = function () {
         });
     }
 
-    // Inactive filter
-    if (inactiveDays > 0) {
-        const field = inactiveField === "oldestLatestAccess"
-            ? "oldestLatestAccess"
-            : "latestAccess";
-        rows = rows.filter(function (r) {
-            return daysSince(r[field]) >= inactiveDays;
-        });
-    }
-
     // Server filter
     if (serverVal) {
         rows = rows.filter(function (r) { return r.servers.has(serverVal); });
+    }
+
+    // Latest Access filter
+    if (latestFilter) {
+        rows = rows.filter(function (r) {
+            return app.matchesDateFilter(r.latestAccess, latestFilter);
+        });
+    }
+
+    // Oldest Latest Access filter
+    if (oldestFilter) {
+        rows = rows.filter(function (r) {
+            return app.matchesDateFilter(r.oldestLatestAccess, oldestFilter);
+        });
     }
 
     // Type filter

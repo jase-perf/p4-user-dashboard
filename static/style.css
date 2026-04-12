@@ -204,6 +204,26 @@
     color: #f59e0b;
 }
 
+/* Column-level filters in table header */
+.filter-row td {
+    padding: 4px 8px 8px;
+    background-color: #1f2937;
+    border-top: 1px solid #374151;
+}
+.col-filter {
+    background-color: #111827;
+    border: 1px solid #4b5563;
+    color: #d1d5db;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+    padding: 3px 6px;
+    width: 100%;
+}
+.col-filter:focus {
+    border-color: #3b82f6;
+    outline: none;
+}
+
 /* Config table inputs */
 .config-input {
     background-color: #111827;
