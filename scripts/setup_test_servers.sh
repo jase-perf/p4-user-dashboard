@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PORTS=(1701 1702 1703)
+PORTS=(1711 1712 1713)
 NAMES=("tokyo-main" "osaka-dev" "nagoya-art")
-BASE_DIR="/tmp/p4d-test"
+BASE_DIR="/tmp/p4d-claude-test"
 
 teardown() {
     for port in "${PORTS[@]}"; do
@@ -49,7 +49,7 @@ Type: standard" | p4 user -f -i
 done
 
 # --- Server 1: tokyo-main (port 1701) ---
-export P4PORT="localhost:1701"
+export P4PORT="localhost:${PORTS[0]}"
 export P4USER="super"
 
 echo "User: alice
@@ -88,7 +88,7 @@ FullName: Build Service
 Type: service" | p4 user -f -i
 
 # --- Server 2: osaka-dev (port 1702) ---
-export P4PORT="localhost:1702"
+export P4PORT="localhost:${PORTS[1]}"
 export P4USER="super"
 
 echo "User: alice
@@ -117,7 +117,7 @@ FullName: Deploy Service
 Type: service" | p4 user -f -i
 
 # --- Server 3: nagoya-art (port 1703) ---
-export P4PORT="localhost:1703"
+export P4PORT="localhost:${PORTS[2]}"
 export P4USER="super"
 
 echo "User: alice
@@ -142,6 +142,6 @@ Type: standard" | p4 user -f -i
 
 echo ""
 echo "Test servers ready:"
-echo "  tokyo-main  — localhost:1701 (7 users + super, 1 service)"
-echo "  osaka-dev   — localhost:1702 (5 users + super, 1 service)"
-echo "  nagoya-art  — localhost:1703 (4 users + super)"
+echo "  tokyo-main  — localhost:${PORTS[0]} (7 users + super, 1 service)"
+echo "  osaka-dev   — localhost:${PORTS[1]} (5 users + super, 1 service)"
+echo "  nagoya-art  — localhost:${PORTS[2]} (4 users + super)"

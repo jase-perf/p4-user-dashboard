@@ -53,6 +53,31 @@ class P4Connector:
         except P4Exception as e:
             return {"success": False, "error": str(e)}
 
+    def get_user_detail(self, username: str) -> dict:
+        """Fetch full user spec including AuthMethod."""
+        try:
+            spec = self._p4.fetch_user(username)
+            return {
+                "success": True,
+                "username": spec.get("User", username),
+                "fullName": spec.get("FullName", ""),
+                "email": spec.get("Email", ""),
+                "authMethod": spec.get("AuthMethod", "perforce"),
+                "type": spec.get("Type", "standard"),
+            }
+        except P4Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def reset_password(self, username: str, new_password: str, force_reset: bool = True) -> dict:
+        """Set a user's password and optionally force reset on next login."""
+        try:
+            self._p4.run("passwd", "-P", new_password, username)
+            if force_reset:
+                self._p4.run("admin", "resetpassword", "-u", username)
+            return {"success": True}
+        except P4Exception as e:
+            return {"success": False, "error": str(e)}
+
     def create_user(self, username: str, full_name: str, email: str, user_type: str = "standard") -> dict:
         """Create a user on the server."""
         try:
@@ -66,23 +91,36 @@ class P4Connector:
             return {"success": False, "error": str(e)}
 
     def get_license_info(self) -> dict:
-        """Get license information from the server."""
+        """Get license information from the server.
+
+        Uses 'p4 license -u' which reports:
+        - userLimit: the licensed seat capacity (int or "unlimited")
+        - userCount: the number of active license-consuming users
+        """
         try:
             license_info = self._p4.run("license", "-u")
-            licensed = None
+            licensed_slots = None
+            used_slots = None
             if license_info:
                 for entry in license_info:
-                    if isinstance(entry, dict) and "userCount" in entry:
-                        raw = entry["userCount"]
-                        # Handle values like ">5" or "unlimited"
-                        cleaned = raw.lstrip(">").strip()
+                    if not isinstance(entry, dict):
+                        continue
+                    # License capacity from userLimit
+                    if "userLimit" in entry:
+                        raw = str(entry["userLimit"]).strip()
+                        if raw.lower() != "unlimited":
+                            try:
+                                licensed_slots = int(raw)
+                            except ValueError:
+                                pass
+                    # Active user count from userCount
+                    if "userCount" in entry:
+                        raw = str(entry["userCount"]).lstrip(">").strip()
                         try:
-                            licensed = int(cleaned)
+                            used_slots = int(raw)
                         except ValueError:
-                            licensed = None
-            users = self._p4.run("users")
-            used = len([u for u in users if u.get("Type", "standard") == "standard"])
-            return {"licensedSlots": licensed, "usedSlots": used}
+                            pass
+            return {"licensedSlots": licensed_slots, "usedSlots": used_slots}
         except P4Exception:
             return {"licensedSlots": None, "usedSlots": None}
 

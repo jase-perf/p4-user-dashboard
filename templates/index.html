@@ -162,7 +162,7 @@
         </div>
     </main>
 
-    <!-- Confirmation Modal -->
+    <!-- Delete Confirmation Modal -->
     <div id="modal-overlay" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
         <div class="bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <h3 id="modal-title" class="text-lg font-semibold mb-3"></h3>
@@ -170,6 +170,48 @@
             <div class="flex justify-end gap-3">
                 <button class="btn-secondary" onclick="app.modalClose()">Cancel</button>
                 <button id="modal-confirm" class="btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-overlay" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-lg w-full mx-4 shadow-xl">
+            <h3 class="text-lg font-semibold mb-4">Edit User</h3>
+            <div id="edit-loading" class="text-gray-400 text-sm py-4">Loading user details...</div>
+            <div id="edit-form" class="hidden">
+                <div class="text-sm text-gray-400 mb-4">
+                    <span id="edit-username" class="font-medium text-gray-200"></span>
+                    on <span id="edit-server" class="font-medium text-gray-200"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="filter-label">Full Name</label>
+                    <input id="edit-fullname" type="text" class="filter-input w-full">
+                </div>
+                <div class="mb-3">
+                    <label class="filter-label">Email</label>
+                    <input id="edit-email" type="text" class="filter-input w-full">
+                </div>
+                <div id="edit-password-section" class="mb-3 pt-3 border-t border-gray-700">
+                    <label class="filter-label">Password Reset</label>
+                    <div class="flex gap-2 items-center">
+                        <button id="edit-reset-btn" class="btn-secondary btn-sm" onclick="app.doPasswordReset()">
+                            Generate &amp; Reset Password
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Assigns a random password and forces the user to change it on next login.</p>
+                    <div id="edit-password-result" class="hidden mt-2 bg-gray-900 border border-gray-600 rounded p-3">
+                        <p class="text-xs text-gray-400 mb-1">New temporary password (copy and share with user):</p>
+                        <code id="edit-new-password" class="text-green-400 text-sm font-mono select-all"></code>
+                    </div>
+                </div>
+                <div id="edit-sso-notice" class="hidden mb-3 pt-3 border-t border-gray-700">
+                    <p class="text-sm text-yellow-400">This account uses SSO authentication (<span id="edit-auth-method"></span>). Password reset is not available.</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-4">
+                <button class="btn-secondary" onclick="app.editClose()">Cancel</button>
+                <button id="edit-save-btn" class="btn-primary" onclick="app.editSave()">Save Changes</button>
             </div>
         </div>
     </div>

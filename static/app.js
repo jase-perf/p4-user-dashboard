@@ -528,30 +528,82 @@ app.appendUserDetailRow = function (tbody, row) {
 // User Actions
 // ---------------------------------------------------------------------------
 
+// --- Edit User Modal ---
+
+app._editContext = null;
+
 app.editUser = async function (server, username, currentName, currentEmail) {
-    var newName = prompt("Full Name:", currentName);
-    if (newName === null) return;
-    var newEmail = prompt("Email:", currentEmail);
-    if (newEmail === null) return;
+    app._editContext = { server: server, username: username, originalName: currentName, originalEmail: currentEmail };
 
-    var body = {};
-    if (newName !== currentName) body.fullName = newName;
-    if (newEmail !== currentEmail) body.email = newEmail;
+    // Show modal with loading state
+    document.getElementById("edit-loading").classList.remove("hidden");
+    document.getElementById("edit-form").classList.add("hidden");
+    document.getElementById("edit-password-result").classList.add("hidden");
+    document.getElementById("edit-overlay").classList.remove("hidden");
 
-    if (Object.keys(body).length === 0) return;
-
+    // Fetch full user detail to get AuthMethod
     try {
         var res = await fetch(
             "/api/servers/" + encodeURIComponent(server) +
-            "/users/" + encodeURIComponent(username),
+            "/users/" + encodeURIComponent(username) + "/detail"
+        );
+        var detail = await res.json();
+        if (!detail.success) {
+            app.showError("Failed to load user details: " + (detail.error || "Unknown error"));
+            app.editClose();
+            return;
+        }
+
+        app._editContext.authMethod = detail.authMethod;
+
+        document.getElementById("edit-username").textContent = username;
+        document.getElementById("edit-server").textContent = server;
+        document.getElementById("edit-fullname").value = detail.fullName;
+        document.getElementById("edit-email").value = detail.email;
+
+        // Show password reset only for non-SSO users
+        var isSSO = detail.authMethod && detail.authMethod !== "perforce";
+        document.getElementById("edit-password-section").classList.toggle("hidden", isSSO);
+        document.getElementById("edit-sso-notice").classList.toggle("hidden", !isSSO);
+        if (isSSO) {
+            document.getElementById("edit-auth-method").textContent = detail.authMethod;
+        }
+
+        document.getElementById("edit-loading").classList.add("hidden");
+        document.getElementById("edit-form").classList.remove("hidden");
+    } catch (err) {
+        app.showError("Failed to load user details: " + err.message);
+        app.editClose();
+    }
+};
+
+app.editSave = async function () {
+    var ctx = app._editContext;
+    if (!ctx) return;
+
+    var newName = document.getElementById("edit-fullname").value.trim();
+    var newEmail = document.getElementById("edit-email").value.trim();
+
+    var body = {};
+    if (newName !== ctx.originalName) body.fullName = newName;
+    if (newEmail !== ctx.originalEmail) body.email = newEmail;
+
+    if (Object.keys(body).length === 0) {
+        app.editClose();
+        return;
+    }
+
+    try {
+        var res = await fetch(
+            "/api/servers/" + encodeURIComponent(ctx.server) +
+            "/users/" + encodeURIComponent(ctx.username),
             { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
         );
         var result = await res.json();
         if (result.success) {
-            // Update local cache
             for (var userData of Object.values(app.data.users)) {
                 for (var acct of userData.accounts) {
-                    if (acct.server === server && acct.username === username) {
+                    if (acct.server === ctx.server && acct.username === ctx.username) {
                         if (body.fullName !== undefined) acct.fullName = body.fullName;
                         if (body.email !== undefined) acct.email = body.email;
                     }
@@ -559,12 +611,61 @@ app.editUser = async function (server, username, currentName, currentEmail) {
             }
             app.processUsers();
             app.renderUsers();
+            app.editClose();
         } else {
             app.showError("Edit failed: " + (result.error || "Unknown error"));
         }
     } catch (err) {
         app.showError("Edit failed: " + err.message);
     }
+};
+
+app.doPasswordReset = async function () {
+    var ctx = app._editContext;
+    if (!ctx) return;
+
+    // Generate random password: 12 chars, at least one number and one special char
+    var chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
+    var nums = "23456789";
+    var specials = "!@#$%&*?";
+    var pw = "";
+    for (var i = 0; i < 9; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+    pw += nums[Math.floor(Math.random() * nums.length)];
+    pw += specials[Math.floor(Math.random() * specials.length)];
+    // Shuffle
+    pw = pw.split("").sort(function () { return Math.random() - 0.5; }).join("");
+
+    var btn = document.getElementById("edit-reset-btn");
+    btn.disabled = true;
+    btn.textContent = "Resetting...";
+
+    try {
+        var res = await fetch(
+            "/api/servers/" + encodeURIComponent(ctx.server) +
+            "/users/" + encodeURIComponent(ctx.username) + "/reset-password",
+            { method: "POST", headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: pw, forceReset: true }) }
+        );
+        var result = await res.json();
+        if (result.success) {
+            document.getElementById("edit-new-password").textContent = pw;
+            document.getElementById("edit-password-result").classList.remove("hidden");
+            btn.textContent = "Reset Again";
+        } else {
+            app.showError("Password reset failed: " + (result.error || "Unknown error"));
+            btn.textContent = "Generate & Reset Password";
+        }
+    } catch (err) {
+        app.showError("Password reset failed: " + err.message);
+        btn.textContent = "Generate & Reset Password";
+    } finally {
+        btn.disabled = false;
+    }
+};
+
+app.editClose = function () {
+    document.getElementById("edit-overlay").classList.add("hidden");
+    app._editContext = null;
 };
 
 app.confirmDeleteUser = function (server, username) {
@@ -613,9 +714,12 @@ app.modalClose = function () {
     document.getElementById("modal-overlay").classList.add("hidden");
 };
 
-// Close modal on overlay click
+// Close modals on overlay click
 document.getElementById("modal-overlay").addEventListener("click", function (e) {
     if (e.target === this) app.modalClose();
+});
+document.getElementById("edit-overlay").addEventListener("click", function (e) {
+    if (e.target === this) app.editClose();
 });
 
 // ---------------------------------------------------------------------------
@@ -965,6 +1069,7 @@ app.configSave = async function () {
 document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
         app.modalClose();
+        app.editClose();
     }
 });
 

@@ -217,6 +217,37 @@ def create_app(config_path: str | None = None) -> FastAPI:
         finally:
             conn.disconnect()
 
+    @app.get("/api/servers/{server_name}/users/{username}/detail")
+    async def get_user_detail(server_name: str, username: str):
+        conn = _get_connector_for_server(server_name)
+        if not conn:
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": f"Server '{server_name}' not found or not connected"},
+            )
+        try:
+            return conn.get_user_detail(username)
+        finally:
+            conn.disconnect()
+
+    @app.post("/api/servers/{server_name}/users/{username}/reset-password")
+    async def reset_password(server_name: str, username: str, request: Request):
+        body = await request.json()
+        conn = _get_connector_for_server(server_name)
+        if not conn:
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": f"Server '{server_name}' not found or not connected"},
+            )
+        try:
+            return conn.reset_password(
+                username,
+                new_password=body["password"],
+                force_reset=body.get("forceReset", True),
+            )
+        finally:
+            conn.disconnect()
+
     @app.get("/api/config")
     async def get_config():
         return _config.to_dict()

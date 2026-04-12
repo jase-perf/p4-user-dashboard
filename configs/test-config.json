@@ -1,6 +1,6 @@
 {
   "port": 8181,
-  "licensedUniqueUsers": 10,
+  "licensedUniqueUsers": 100,
   "servers": [
     {
       "name": "tokyo-main",
