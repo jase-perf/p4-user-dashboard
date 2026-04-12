@@ -1,11 +1,16 @@
 {
   "port": 8181,
-  "licensedUniqueUsers": 50,
+  "licensedUniqueUsers": 100,
   "servers": [
     {"name": "tokyo-prod", "port": "localhost:1701", "user": "super"},
     {"name": "osaka-dev", "port": "localhost:1702", "user": "super"},
     {"name": "nagoya-art", "port": "localhost:1703", "user": "super"},
     {"name": "seoul-mobile", "port": "localhost:1704", "user": "super"},
-    {"name": "singapore-qa", "port": "localhost:1705", "user": "super"}
+    {"name": "singapore-qa", "port": "localhost:1705", "user": "super"},
+    {"name": "tokyo-platform", "port": "localhost:1706", "user": "super"},
+    {"name": "fukuoka-online", "port": "localhost:1707", "user": "super"},
+    {"name": "shanghai-loc", "port": "localhost:1708", "user": "super"},
+    {"name": "bangalore-tools", "port": "localhost:1709", "user": "super"},
+    {"name": "la-mocap", "port": "localhost:1710", "user": "super"}
   ]
 }

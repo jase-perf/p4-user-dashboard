@@ -26,8 +26,8 @@ BIN_DIR="$DEMO_DIR/bin"
 CHECKPOINTS_DIR="$DEMO_DIR/checkpoints"
 DATA_DIR="$DEMO_DIR/data"
 
-PORTS=(1701 1702 1703 1704 1705)
-NAMES=("tokyo-prod" "osaka-dev" "nagoya-art" "seoul-mobile" "singapore-qa")
+PORTS=(1701 1702 1703 1704 1705 1706 1707 1708 1709 1710)
+NAMES=("tokyo-prod" "osaka-dev" "nagoya-art" "seoul-mobile" "singapore-qa" "tokyo-platform" "fukuoka-online" "shanghai-loc" "bangalore-tools" "la-mocap")
 
 # ---- Locate p4d binary ----
 

@@ -26,6 +26,11 @@ def test_servers():
         "nagoya-art": {"port": "localhost:1703", "user": "super", "name": "nagoya-art"},
         "seoul-mobile": {"port": "localhost:1704", "user": "super", "name": "seoul-mobile"},
         "singapore-qa": {"port": "localhost:1705", "user": "super", "name": "singapore-qa"},
+        "tokyo-platform": {"port": "localhost:1706", "user": "super", "name": "tokyo-platform"},
+        "fukuoka-online": {"port": "localhost:1707", "user": "super", "name": "fukuoka-online"},
+        "shanghai-loc": {"port": "localhost:1708", "user": "super", "name": "shanghai-loc"},
+        "bangalore-tools": {"port": "localhost:1709", "user": "super", "name": "bangalore-tools"},
+        "la-mocap": {"port": "localhost:1710", "user": "super", "name": "la-mocap"},
     }
     try:
         subprocess.run(["bash", setup_script, "--teardown"], check=True, capture_output=True, text=True)

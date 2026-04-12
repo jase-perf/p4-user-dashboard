@@ -86,7 +86,7 @@ class TestConfigEndpoint:
         assert resp.status_code == 200
         data = resp.json()
         assert "servers" in data
-        assert len(data["servers"]) == 5
+        assert len(data["servers"]) == 10
 
     def test_update_config(self, client):
         resp = client.get("/api/config")
