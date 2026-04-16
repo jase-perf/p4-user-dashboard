@@ -1,5 +1,7 @@
 # P4 User Dashboard
 
+**English** | [日本語](README.ja.md)
+
 A lightweight, locally-run tool for managing Perforce users across multiple P4 servers. Built for administrators who need to audit license usage, identify inactive accounts, and manage users across large multi-server environments.
 
 ![Dashboard Screenshot](docs/screenshot-users.png)
