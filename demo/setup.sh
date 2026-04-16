@@ -4,15 +4,9 @@ set -euo pipefail
 # =============================================================================
 # P4 User Dashboard — Demo Server Setup
 #
-# Sets up 5 lightweight P4D servers with realistic demo data:
-#   - tokyo-prod    (unicode)     18 users + 2 service
-#   - osaka-dev     (non-unicode) 14 users + 1 service
-#   - nagoya-art    (unicode)     12 users + 1 service
-#   - seoul-mobile  (non-unicode) 10 users + 1 service
-#   - singapore-qa  (non-unicode)  8 users + 1 service
-#
-# Users have varied access times (1 day to 400 days ago) to demonstrate
-# the dashboard's filtering and analysis capabilities.
+# Sets up 10 lightweight P4D servers with realistic demo data across
+# 5 countries. Users have varied access times (1 day to 400 days ago)
+# to demonstrate the dashboard's filtering and analysis capabilities.
 #
 # Usage:
 #   bash demo/setup.sh              # Set up demo servers
@@ -183,19 +177,39 @@ for i in "${!PORTS[@]}"; do
 
     mkdir -p "$root"
 
-    # Restore from checkpoint
-    "$P4D_BIN" -r "$root" -jr "$ckp" >/dev/null 2>&1
+    # Restore from checkpoint (-C0 forces Unix case handling, needed on
+    # case-insensitive filesystems like default macOS APFS)
+    if ! "$P4D_BIN" -C0 -r "$root" -jr "$ckp" >"$root/restore.log" 2>&1; then
+        echo "  ERROR: $name — checkpoint restore failed:"
+        sed 's/^/    /' "$root/restore.log"
+        continue
+    fi
+
+    # Check for port conflict before starting
+    if lsof -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
+        echo "  ERROR: $name — port $port is already in use"
+        continue
+    fi
 
     # Start server
-    "$P4D_BIN" -p "$port" -r "$root" -d </dev/null >/dev/null 2>&1
+    if ! "$P4D_BIN" -C0 -p "$port" -r "$root" -d </dev/null >"$root/start.log" 2>&1; then
+        echo "  ERROR: $name — server failed to start:"
+        sed 's/^/    /' "$root/start.log"
+        continue
+    fi
 
-    # Verify (try without charset first, then with — one will work)
+    # Verify server is responding
+    sleep 0.2
     count=$(P4PORT="localhost:$port" P4USER=super p4 users -a 2>/dev/null | wc -l || true)
     if [ "$count" = "0" ]; then
         count=$(P4PORT="localhost:$port" P4USER=super P4CHARSET=utf8 p4 users -a 2>/dev/null | wc -l || true)
     fi
 
-    echo "  $name  :$port  ($count users)"
+    if [ "$count" = "0" ]; then
+        echo "  WARNING: $name :$port started but returned 0 users"
+    else
+        echo "  $name  :$port  ($count users)"
+    fi
 done
 
 echo ""
