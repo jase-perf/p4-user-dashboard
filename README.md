@@ -17,7 +17,7 @@ Large game studios and enterprises often run dozens or hundreds of P4 commit ser
 
 - **Aggregates users by email** across all configured P4 servers into a single view
 - **Shows cross-server overlap** — see which users have accounts on multiple servers and how many licenses they're consuming
-- **Surfaces inactive accounts** with "Latest Access" and "Oldest Latest Access" columns — the latter catches users who are active on one server but abandoned on another
+- **Surfaces inactive accounts** with "Latest Access" and "Oldest Access (All Accounts)" columns — the latter catches users who are active on one server but abandoned on another
 - **Supports filtering and sorting** on every column, with "newer than" / "older than" date filters
 - **Edit and delete** individual user accounts, with password reset for non-SSO users
 - **Works with mixed environments** — automatically handles both unicode and non-unicode P4 servers

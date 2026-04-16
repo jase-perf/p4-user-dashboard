@@ -53,7 +53,7 @@ var LANG = {
         accountCount: "Accounts",
         serverCount: "Servers",
         latestAccess: "Latest Access",
-        oldestLatestAccess: "Oldest Latest Access",
+        oldestLatestAccess: "Oldest Access (All Accounts)",
         types: "Type(s)",
 
         // Filter placeholders
@@ -160,7 +160,7 @@ var LANG = {
         accountCount: "アカウント数",
         serverCount: "サーバー数",
         latestAccess: "最終アクセス",
-        oldestLatestAccess: "最古の最終アクセス",
+        oldestLatestAccess: "全アカウントの最も古いアクセス",
         types: "タイプ",
 
         searchPlaceholder: "検索...",
@@ -800,7 +800,7 @@ app.getFilteredUsers = function () {
         });
     }
 
-    // Oldest Latest Access filter
+    // Oldest Access (All Accounts) filter
     if (oldestFilter) {
         rows = rows.filter(function (r) {
             return app.matchesDateFilter(r.oldestLatestAccess, oldestFilter);
