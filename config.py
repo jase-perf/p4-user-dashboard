@@ -14,6 +14,7 @@ class ServerConfig:
 
 @dataclass
 class DashboardConfig:
+    host: str = "127.0.0.1"
     port: int = 8080
     licensed_unique_users: int | None = None
     servers: list[ServerConfig] = field(default_factory=list)
@@ -21,6 +22,7 @@ class DashboardConfig:
 
     def to_dict(self) -> dict:
         return {
+            "host": self.host,
             "port": self.port,
             "licensedUniqueUsers": self.licensed_unique_users,
             "servers": [
@@ -46,6 +48,7 @@ def load_config(path: str) -> DashboardConfig:
         for s in data.get("servers", [])
     ]
     return DashboardConfig(
+        host=data.get("host", "127.0.0.1"),
         port=data.get("port", 8080),
         licensed_unique_users=data.get("licensedUniqueUsers"),
         servers=servers,

@@ -290,10 +290,10 @@ def main():
     _config_path = config_path
 
     config = load_config(config_path)
+    host = config.host
     port = config.port
 
-    host = "0.0.0.0"
-    print(f"Starting P4 User Dashboard on http://0.0.0.0:{port}")
+    print(f"Starting P4 User Dashboard on http://{host}:{port}")
     uvicorn.run(
         create_app(config_path),
         host=host,
